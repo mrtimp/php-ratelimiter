@@ -10,7 +10,7 @@
         }
     ],
     "require": {
-        "php": ">=5.5",
+        "php": ">=5.4",
         "desarrolla2/cache": "~2.0"
     },
     "require-dev": {
