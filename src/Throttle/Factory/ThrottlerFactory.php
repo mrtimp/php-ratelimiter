@@ -25,11 +25,14 @@
 
 namespace Sunspikes\Ratelimit\Throttle\Factory;
 
-use Sunspikes\Ratelimit\Cache\Adapter\CacheAdapterInterface;
+use Sunspikes\Ratelimit\Time\PhpTimeAdapter;
 use Sunspikes\Ratelimit\Throttle\Entity\Data;
+use Sunspikes\Ratelimit\Cache\Adapter\CacheAdapterInterface;
+use Sunspikes\Ratelimit\Throttle\Settings\FixedWindowSettings;
+use Sunspikes\Ratelimit\Throttle\Throttler\FixedWindowThrottler;
 use Sunspikes\Ratelimit\Throttle\Settings\ElasticWindowSettings;
-use Sunspikes\Ratelimit\Throttle\Settings\ThrottleSettingsInterface;
 use Sunspikes\Ratelimit\Throttle\Throttler\ElasticWindowThrottler;
+use Sunspikes\Ratelimit\Throttle\Settings\ThrottleSettingsInterface;
 
 class ThrottlerFactory implements FactoryInterface
 {
@@ -62,7 +65,7 @@ class ThrottlerFactory implements FactoryInterface
      * @param Data                      $data
      * @param ThrottleSettingsInterface $settings
      *
-     * @return ElasticWindowThrottler
+     * @return ElasticWindowThrottler|FixedWindowThrottler
      */
     protected function createThrottler(Data $data, ThrottleSettingsInterface $settings)
     {
@@ -72,6 +75,16 @@ class ThrottlerFactory implements FactoryInterface
                 $data->getKey(),
                 $settings->getLimit(),
                 $settings->getTime()
+            );
+        } else if ($settings instanceof FixedWindowSettings) {
+            $timeAdaptor = new PhpTimeAdapter;
+
+            return new FixedWindowThrottler(
+                $this->cacheAdapter,
+                $timeAdaptor,
+                $data->getKey(),
+                $settings->getHitLimit(),
+                $settings->getTimeLimit()
             );
         }
 
